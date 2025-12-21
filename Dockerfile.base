@@ -1,6 +1,4 @@
-FROM composer:2.9 AS composer
-
-FROM php:8.4.15-fpm-alpine3.22
+FROM php:8.4.15-fpm-alpine3.22 AS base
 
 ENV NGINX_VERSION="~1.28"
 ENV SUPERVISOR_VERSION="~4.2"
@@ -52,11 +50,13 @@ RUN set -eux; \
     \
     apk del .build-deps
 
-COPY --from=composer /usr/bin/composer /usr/local/bin/composer
-
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 RUN addgroup -g 1000 user-group && \
     adduser -u 1000 -G user-group -h /home/user -D user
 
 RUN mkdir -p /var/cache/nginx && chown -R nginx:nginx /var/cache/nginx
+
+FROM base AS ci
+
+COPY --from=composer:2.9 /usr/bin/composer /usr/local/bin/composer
