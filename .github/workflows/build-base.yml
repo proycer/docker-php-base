@@ -45,7 +45,7 @@ jobs:
                     provenance: false
                     sbom: false
 
-    build-ci:
+    build-dev:
         name: Build Dev Image (Runtime + Composer)
         runs-on: ubuntu-latest
         needs: build-base
@@ -66,12 +66,12 @@ jobs:
             -   name: Set up Docker Buildx
                 uses: docker/setup-buildx-action@v3
 
-            -   name: Build and Push CI Image
+            -   name: Build and Push Dev Image
                 uses: docker/build-push-action@v6
                 with:
                     context: .
                     file: Dockerfile.base
-                    target: ci
+                    target: dev
                     push: true
                     tags: ${{ env.IMAGE_NAME }}-dev:${{ env.IMAGE_TAG }}
                     cache-from: type=gha
