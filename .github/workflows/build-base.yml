@@ -9,7 +9,6 @@ on:
 
 env:
     IMAGE_NAME: ghcr.io/proycer/php-base
-    IMAGE_TAG: 8.4-fpm-alpine
 
 jobs:
     build:
@@ -39,7 +38,7 @@ jobs:
                     file: Dockerfile.base
                     target: base
                     push: true
-                    tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+                    tags: ${{ env.IMAGE_NAME }}:8.4-fpm-alpine
                     cache-from: type=gha
                     cache-to: type=gha,mode=max
                     provenance: false
@@ -52,8 +51,35 @@ jobs:
                     file: Dockerfile.base
                     target: dev
                     push: true
-                    tags: ${{ env.IMAGE_NAME }}-dev:${{ env.IMAGE_TAG }}
+                    tags: ${{ env.IMAGE_NAME }}-dev:8.4-fpm-alpine
                     cache-from: type=gha
                     cache-to: type=gha,mode=max
                     provenance: false
                     sbom: false
+
+            -   name: Build and Push FrankenPHP Base Image
+                uses: docker/build-push-action@v6
+                with:
+                    context: .
+                    file: Dockerfile.frankenphp
+                    target: base
+                    push: true
+                    tags: ${{ env.IMAGE_NAME }}:8.5-frankenphp-alpine
+                    cache-from: type=gha
+                    cache-to: type=gha,mode=max
+                    provenance: false
+                    sbom: false
+
+            -   name: Build and Push FrankenPHP Dev Image
+                uses: docker/build-push-action@v6
+                with:
+                    context: .
+                    file: Dockerfile.frankenphp
+                    target: dev
+                    push: true
+                    tags: ${{ env.IMAGE_NAME }}-dev:8.5-frankenphp-alpine
+                    cache-from: type=gha
+                    cache-to: type=gha,mode=max
+                    provenance: false
+                    sbom: false
+

@@ -1,0 +1,56 @@
+# ============================================
+# Stage: base - Essentials
+# ============================================
+FROM dunglas/frankenphp:php8.5-alpine AS base
+
+ENV APCU_VERSION="5.1.24"
+
+# install-php-extensions (included in dunglas/frankenphp) simplifies extension installation
+RUN install-php-extensions \
+    bcmath \
+    intl \
+    opcache \
+    pdo_pgsql \
+    zip \
+    apcu \
+    ;
+
+RUN apk add --no-cache \
+    acl \
+    fcgi \
+    file \
+    gettext \
+    gnu-libiconv \
+    openssl \
+    su-exec \
+    ;
+
+ENV LD_PRELOAD="/usr/lib/preloadable_libiconv.so"
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+RUN addgroup -g 1000 user-group && \
+    adduser -u 1000 -G user-group -h /home/user -D user
+
+# ============================================
+# Stage: dev - Development and CI tools
+# ============================================
+FROM base AS dev
+
+ENV XDEBUG_VERSION="3.4.1" 
+# Xdebug 3.4.x supports PHP 8.4+, assuming support for 8.5 or using closest compatible.
+# Actually, for 8.5 we might need to rely on what's available or install via pecl if install-php-extensions handles it.
+# install-php-extensions handles xdebug installation compatible with the PHP version usually.
+
+ENV CHROME_BIN=/usr/bin/chromium-browser
+ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
+ENV PANTHER_NO_SANDBOX=1
+ENV PANTHER_CHROME_ARGUMENTS="--disable-dev-shm-usage --no-sandbox"
+
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
+RUN apk add --no-cache git linux-headers chromium chromium-chromedriver make
+
+RUN install-php-extensions xdebug
+
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
