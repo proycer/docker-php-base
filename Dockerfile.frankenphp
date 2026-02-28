@@ -3,6 +3,8 @@
 # ============================================
 FROM dunglas/frankenphp:php8.5-alpine AS base
 
+WORKDIR /var/www/html
+
 ENV APCU_VERSION="5.1.24"
 
 # install-php-extensions (included in dunglas/frankenphp) simplifies extension installation
